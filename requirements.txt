@@ -1,0 +1,11 @@
+flask
+redis
+rq
+requests
+stop_words
+rq_dashboard==0.5.3
+beautifulsoup4
+prometheus-flask-exporter==0.7.1
+sentry-sdk[flask]==0.7.13
+pytest==4.4.0
+uwsgi==2.0.18
