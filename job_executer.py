@@ -28,8 +28,10 @@ def do_work(params):
         key = str(params['job'] + str(uuid.uuid4()))
         if job == 'url':
             count_and_save_words(url)
-        if job == 'hello':
+        elif job == 'hello':
             say_hello()
+        else:
+            raise Exception("No job found with that name")
         end = time.time()
         total_time = (end - start)
         message = "Job took " + str(total_time) + " seconds"
