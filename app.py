@@ -45,7 +45,7 @@ def get_counts():
     params = {"url": url, "job": job}
 
     job = q.enqueue_call(
-        func=do_work, args=(params,), result_ttl=5000
+        func=do_work, args=(params,), result_ttl=5000, timeout=1000000
     )
     # return created job id
     return job.get_id()

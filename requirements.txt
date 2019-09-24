@@ -1,5 +1,6 @@
 flask
 redis
+scrapy
 rq
 requests
 stop_words

@@ -8,6 +8,7 @@ import json
 import time
 import redis
 import uuid
+from Jobs.web_scraper import Scraper
 from urllib.parse import urlparse
 
 redis_db = redis.StrictRedis(host="localhost", port=6379, db=0)
@@ -26,12 +27,15 @@ def do_work(params):
         job = params.get('job')
         url = params.get('url')
         key = str(params['job'] + str(uuid.uuid4()))
-        if job == 'url':
-            count_and_save_words(url)
-        elif job == 'hello':
-            say_hello()
-        else:
-            raise Exception("No job found with that name")
+        funcs = {
+            'url': count_and_save_words,
+            'hello': say_hello,
+            'scrape': Scraper.scrape,
+        }
+        funcs[job](url)
+
+        # else:
+        #     raise Exception("No job found with that name")
         end = time.time()
         total_time = (end - start)
         message = "Job took " + str(total_time) + " seconds"
@@ -94,5 +98,5 @@ def count_and_save_words(url):
         return {"error": errors}
 
 
-def say_hello():
-    return "Hello"
+def say_hello(url):
+    return "Hello" + url
