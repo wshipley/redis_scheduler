@@ -2,7 +2,7 @@ from rq import Queue
 from rq.job import Job
 from worker import conn
 from requests import request
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 from job_executer import do_work
 import rq_dashboard
 import json
@@ -20,7 +20,6 @@ q = Queue(connection=conn)
 def get_results(job_key):
 
     job = Job.fetch(job_key, connection=conn)
-
     if job.is_finished:
         result = job.result
         results = result

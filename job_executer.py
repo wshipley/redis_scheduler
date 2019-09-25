@@ -7,8 +7,13 @@ from Jobs.misc_jobs import Miscjobs
 
 redis_db = redis.StrictRedis(host="localhost", port=6379, db=0)
 
-
+ps = redis_db.pubsub()
+ps.subscribe(['default'])
+#
+# rc.publish('foo', 'hello world')
+#
 def insert_success_redis(key, message):
+    redis_db.publish('default', "joblogs:success:"+key)
     redis_db.set("joblogs:success:"+key, message)
 
 def insert_failure_redis(key, message):
