@@ -6,7 +6,7 @@ from flask import Flask, render_template, request
 from job_executer import do_work
 import rq_dashboard
 import json
-
+import uuid
 app = Flask(__name__)
 
 app.config.from_object(rq_dashboard.default_settings)
@@ -41,10 +41,10 @@ def get_counts():
     url = data.get("url")
 
     # start job
-    params = {"url": url, "job": job}
-
+    jobid = str(uuid.uuid4())
+    params = {"url": url, "job": job, 'job_id': jobid}
     job = q.enqueue_call(
-        func=do_work, args=(params,), result_ttl=5000, timeout=1000000
+        func=do_work, args=(params,), result_ttl=5000, timeout=1000000, job_id=jobid
     )
     # return created job id
     return job.get_id()

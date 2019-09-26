@@ -21,11 +21,15 @@ def insert_failure_redis(key, message):
 
 
 def do_work(params):
+    jobid = params.get('job_id')
+
+    redis_db.publish('default', jobid)
+
     start = time.time()
     try:
         job = params.get('job')
         url = params.get('url')
-        key = str(params['job'] + str(uuid.uuid4()))
+        key = str(jobid)
         funcs = {
             'url': Analytics().count_and_save_words,
             'hello': Miscjobs().say_hello,
