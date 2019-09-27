@@ -7,6 +7,9 @@ from job_executer import do_work
 import rq_dashboard
 import json
 import uuid
+from redis import Redis
+from rq.registry import StartedJobRegistry
+
 app = Flask(__name__)
 
 app.config.from_object(rq_dashboard.default_settings)
@@ -14,6 +17,16 @@ app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 
 # app.config.from_object(os.environ['APP_SETTINGS'])
 q = Queue(connection=conn)
+
+
+@app.route("/runningjobs", methods=['GET'])
+def running_jobs():
+    redis_conn = Redis()
+    registry = StartedJobRegistry('default', connection=redis_conn)
+    running_job_ids = registry.get_job_ids()  # Jobs which are exactly running.
+    expired_job_ids = registry.get_expired_job_ids()
+    info = {"running_jobs": running_job_ids, "expired_jobs" : expired_job_ids}
+    return json.dumps(info)
 
 
 @app.route("/results/<job_key>", methods=['GET'])

@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 
 class Scraper:
-    def scrape(self):
+    def scrape(self, jobinstructions):
         # Set the URL you want to webscrape from
         url = 'http://web.mta.info/developers/turnstile.html'
 
@@ -25,4 +25,4 @@ class Scraper:
                 urllib.request.urlretrieve(download_url, './data/' + link[link.find('/turnstile_') + 1:])
                 time.sleep(1)  # pause the code for a sec
         except Exception as ex:
-            print("something went wrong")
+            print("something went wrong" + str(ex))
