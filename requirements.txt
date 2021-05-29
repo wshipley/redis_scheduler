@@ -5,8 +5,7 @@ rq
 requests
 stop_words
 nltk
-rq_dashboard==0.5.3
+rq_dashboard
 beautifulsoup4
-pytest==4.4.0
-uwsgi==2.0.18
 supervisor
+Flask-APScheduler
