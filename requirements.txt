@@ -8,4 +8,3 @@ nltk
 rq_dashboard
 beautifulsoup4
 supervisor
-Flask-APScheduler
