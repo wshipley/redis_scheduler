@@ -8,3 +8,5 @@ nltk
 rq_dashboard
 beautifulsoup4
 supervisor
+rq-scheduler
+flask-socketio

@@ -5,6 +5,9 @@ import json
 from Jobs.web_scraper import Scraper
 from Jobs.web_analytics import Analytics
 from Jobs.misc_jobs import Miscjobs
+from Jobs.Downloader import Downloader
+from Jobs.Pinger import Pinger
+from rq.decorators import job
 
 redis_db = redis.StrictRedis(host="localhost", port=6379, db=0)
 
@@ -24,6 +27,13 @@ def _insert_failure_redis(key, message):
     redis_db.set("joblogs:failure:"+key, message)
 
 
+# @job('low', connection=my_redis_conn, timeout=5)
+# def add(x, y):
+#     return x + y
+#
+# job = add.delay(3, 4)
+# time.sleep(1)
+# print(job.result)
 def do_work(params):
     jobid = params.get('job_id')
     msg = json.dumps({"job": jobid, "status": "started"})
@@ -35,9 +45,11 @@ def do_work(params):
         jobinstructions = params.get('url')
         key = str(jobid)
         funcs = {
-            'url': Analytics().count_and_save_words,
-            'hello': Miscjobs().say_hello,
+            'analytics': Analytics().count_and_save_words,
+            'blah': Miscjobs().say_hello,
             'scrape': Scraper().scrape,
+            'downloader': Downloader().start,
+            'pinger': Pinger().start
         }
         funcs[job](jobinstructions)
 
