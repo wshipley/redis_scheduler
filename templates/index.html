@@ -29,6 +29,27 @@
             Please check to make sure it is valid before trying again.</span>
           </div>
         </div>
+                <div class="col-sm-5 col-sm-offset-1">
+                  <h1>Job Scheduler</h1>
+          <br>
+          <form role="form" ng-submit="scheduleJob()">
+            <div class="form-group">
+             <span>Job Name</span> <input type="text" name="job" class="form-control" id="one" placeholder="Enter Job..." style="max-width: 300px;" ng-model="scheduledjob" required>
+              <span>URL</span><input type="text" name="url" class="form-control" id="two" placeholder="Enter URL..." style="max-width: 300px;" ng-model="scheduledurl">
+              <span>Interval</span><input type="text" name="url" class="form-control" id="interval" placeholder="Enter Interval..." style="max-width: 300px;" ng-model="scheduledinterval">
+
+            </div>
+            {% raw %}
+              <button type="submit" class="btn btn-primary" ng-disabled="loading">{{ submitButtonText }}</button>
+            {% endraw %}
+          </form>
+          <div class="alert alert-danger" role="alert" ng-show='urlError'>
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            <span>There was an error submitting your URL.<br>
+            Please check to make sure it is valid before trying again.</span>
+          </div>
+        </div>
         <div class="col-sm-5 col-sm-offset-1">
           <h2>Response</h2>
           <br>
@@ -53,6 +74,47 @@
           <img class="col-sm-3 col-sm-offset-4" src="{{ url_for('static',
             filename='spinner.gif') }}" ng-show="loading">
         </div>
+        <br>
+               <div id="scheduledjobs">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Schedule Key</th>
+                  <th>Job Key</th>
+                  <th>Job Message</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% raw %}
+                <tr ng-repeat="x in scheduledjobs">
+                  <td>{{x.schedulerid}}</td>
+                  <td>{{x.jobid}}</td>
+                  <td>{{x.message}}</td>
+                </tr>
+              {% endraw %}
+              </tbody>
+            </table>
+          </div>
+
+        <div class="col-sm-5 col-sm-offset-1">
+          <h1>Cancel Job</h1>
+          <br>
+          <form role="form" ng-submit="cancelJob()">
+            <div class="form-group">
+             <span>Job Name</span> <input type="text" name="job" class="form-control" id="cancelid" placeholder="Enter ID..." style="max-width: 300px;" ng-model="jobid" required>
+            </div>
+            {% raw %}
+              <button type="submit" class="btn btn-primary" ng-disabled="loading">{{ submitButtonText }}</button>
+            {% endraw %}
+          </form>
+          <div class="alert alert-danger" role="alert" ng-show='urlError'>
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            <span>There was an error submitting your URL.<br>
+            Please check to make sure it is valid before trying again.</span>
+          </div>
+        </div>
+
       </div>
     </div>
     <br><br>

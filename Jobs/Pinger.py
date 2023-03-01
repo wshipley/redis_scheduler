@@ -7,10 +7,12 @@ import json
 class Pinger:
     def start(self, jobinstructions):
         print("hello world")
-        self.ping()
+        print(jobinstructions)
+        url = jobinstructions.get('url')
+        self.ping(url)
         print("done")
 
     #
-    def ping(self):
-        items = requests.post('http://localhost:7000/contentListener')  # (your url)
+    def ping(self, url):
+        items = requests.post(url=url)
         return items

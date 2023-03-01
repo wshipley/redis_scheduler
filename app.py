@@ -14,8 +14,8 @@ from rq.registry import ScheduledJobRegistry
 from rq_scheduler import Scheduler
 from flask_socketio import send, emit
 from flask_socketio import SocketIO
+import pickle
 
-# 'jobs',
 scheduler = Scheduler(connection=Redis())
 
 app = Flask(__name__)
@@ -45,24 +45,33 @@ def handle_my_custom_event(json):
     emit('my response', json)
 
 
-@app.route("/schedulejob")
+@app.route("/schedulejob", methods=['POST'])
 def schedule_job():
+    data = json.loads(request.data.decode())
+    url = data.get("url")
+    job = data.get("job")
+    interval = int(data.get("interval"))
     jobid = str(uuid.uuid4())
-    params = {"url": "search.brave.com", "job": "pinger", 'job_id': jobid}
+
+    params = {"url": url, "job": job, 'job_id': jobid}
     blah = scheduler.schedule(
         scheduled_time=datetime.utcnow(),  # Time for first execution, in UTC timezone
         func=do_work,  # Function to be queued
         args=(params,),  # Arguments passed into function when executed
         # kwargs={'foo': 'bar'},  # Keyword arguments passed into function when executed
-        interval=60,  # Time before the function is called again, in seconds
+        interval=interval,  # Time before the function is called again, in seconds
         # repeat=10,  # Repeat this number of times (None means repeat forever)
         meta={'foo': 'bar'}  # Arbitrary pickleable data on the job itself
     )
     redis_conn = Redis()
-    jobinfo = {"Name": "jobblah", "URL": "search.brave", "CRON": None, "Interval": 60}
-    job_key = "jobdetails:" + blah.id
-    redis_conn.hset(job_key, jobinfo)
-    redis_conn.hgetall(job_key)
+    jobinfo = {"Name": job, "URL": url, "CRON": None, "Interval": interval, 'Scheduler_id': blah.id, "Job_id": jobid}
+    job_key = 'jobsdetails:' + blah.id
+    p_mydict = pickle.dumps(jobinfo)
+    redis_conn.set(job_key, p_mydict)
+
+    read_dict = redis_conn.get(job_key)
+    yourdict = pickle.loads(read_dict)
+
     # scheduler.cron(
     #     "* * * * *",  # A cron string (e.g. "0 0 * * 0")
     #     func=do_work,  # Function to be queued
@@ -78,15 +87,16 @@ def schedule_job():
     # url = data.get("url")
 
     # scheduler.enqueue_in(timedelta(seconds=5), do_work, params)
-    return json.dumps(jobinfo)
+    return json.dumps(yourdict)
 
 
-@app.route("/cancel")
-def cancel(job_id):
-    redis_conn = Redis()
-    redis_conn.delete('my-key')
-    scheduler.cancel(job_id)
-    return 200
+@app.route("/cancel", methods=['post'])
+def cancel():
+    data = json.loads(request.data.decode())
+    # redis_conn = Redis()
+    # redis_conn.delete(data.get('job_id'))
+    result = scheduler.cancel(data.get('job_id'))
+    return result
 
 
 @app.route("/runningjobs", methods=['GET'])
@@ -103,7 +113,9 @@ def running_jobs():
     jobs_to_list = []
     for x in scheduled_jobs:
         blah = x[0].return_value()
-        jobs_to_list.append(x[0].return_value())
+        redis_conn.hget(name='jobdetails', key=blah['job_id'])
+        to_return = x[0].id, x[0].return_value()
+        jobs_to_list.append(to_return)
     info = {"running_jobs": running_job_ids, "expired_jobs": expired_job_ids, "scheduled_jobs": jobs_to_list,
             "completed": completed, "failed": failed}
 
@@ -121,22 +133,20 @@ def getfutre_jobs():
     return json.dumps(future_jobs, default=str)
 
 
-@app.route("/scheduledjobs")
+@app.route("/scheduledjobs", methods=['get', 'post'])
 def get_scheduled_jobs():
     redis_conn = Redis()
     registry = ScheduledJobRegistry('default', connection=redis_conn)
-
-    mymap = redis_conn.keys(pattern='rq:job*')
-    poo = registry.get_jobs_to_schedule()
-
-    # blah = redis_conn.scan_iter(match="rq:scheduler:scheduled_jobs*", _type="ZSET")
-    # vals = redis_conn.zrange(112, 0, -1)
+    scheduled_jobs = scheduler.get_jobs(with_times=True)
     jobs = []
-    for x in poo:
-        jobs.append(x)
+    for x in scheduled_jobs:
+        blah = x[0].return_value()
+        job_key = 'jobsdetails:' + x[0].id
 
-    # for x in mymap:
-    #     print(x)
+        read_dict = redis_conn.get(job_key)
+        yourdict = pickle.loads(read_dict)
+        returnvalue = {"schedulerid": x[0].id, "jobid":x[0].return_value()[0].get("key"), "message":x[0].return_value()[0].get("message")}
+        jobs.append(returnvalue)
     return json.dumps(jobs)
 
 
@@ -174,26 +184,8 @@ def get_counts():
 
 
 from datetime import datetime, timedelta
-import time
 from redis import Redis
-from rq import Queue
 
-# def queue_tasks():
-#     jobid = str(uuid.uuid4())
-#     params = {"url": "search.brave.com", "job": "Downloader", 'job_id': jobid}
-#     scheduler.enqueue_in(timedelta(seconds=5), do_work, params)
-#     jobid = str(uuid.uuid4())
-#     scheduler.schedule(
-#         scheduled_time=datetime.utcnow(),  # Time for first execution, in UTC timezone
-#         func=do_work,  # Function to be queued
-#         args=(params,),  # Arguments passed into function when executed
-#         interval=5,  # Time before the function is called again, in seconds
-#         repeat=10,  # Repeat this number of times (None means repeat forever)
-#     )
-#
-#     queue.enqueue_in(timedelta(seconds=10), do_work, 5)
-# def main():
-#     queue_tasks()
 #
 # if __name__ == "__main__":
 #     main()

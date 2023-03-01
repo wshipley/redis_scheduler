@@ -10,7 +10,18 @@
     $scope.submitButtonText = 'Submit';
     $scope.loading = false;
     $scope.urlerror = false;
+    function get_scheduled_jobs()
+    {
+        $http.post('/scheduledjobs', {'url': '/scheduledjobs'}).
+        success(function(results) {
+          $scope.scheduledjobs = results;
+          console.log($scope.scheduledjobs);
+        }).
+        error(function(error) {
+          $log.log(error);
+        });
 
+    };
     $scope.getResults = function() {
 
 
@@ -25,6 +36,19 @@
           $scope.loading = true;
           $scope.submitButtonText = 'Loading...';
           $scope.urlerror = false;
+        }).
+        error(function(error) {
+          $log.log(error);
+        });
+
+    };
+    $scope.cancelJob = function() {
+      // get the URL from the input
+      var cancelid = $scope.jobid;
+      // fire the API request
+      $http.post('/cancel', {'job_id': cancelid}).
+        success(function(results) {
+        alert("job" + result + 'is cancelled')
         }).
         error(function(error) {
           $log.log(error);
@@ -63,6 +87,23 @@
       poller();
     }
 
+     $scope.scheduleJob = function() {
+      // get the URL from the input
+      var url = $scope.scheduledurl;
+      var job = $scope.scheduledjob;
+      var interval = $scope.scheduledinterval;
+
+      // fire the API request
+      $http.post('/schedulejob', {'url': url, 'job': job, 'interval': interval}).
+        success(function(results) {
+        alert(results + " job scheduled")
+        }).
+        error(function(error) {
+          $log.log(error);
+        });
+
+    };
+    get_scheduled_jobs()
   }])
 
 }());

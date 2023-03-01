@@ -42,7 +42,7 @@ def do_work(params):
     start = time.time()
     try:
         job = params.get('job')
-        jobinstructions = params.get('url')
+        jobinstructions = params
         key = str(jobid)
         funcs = {
             'analytics': Analytics().count_and_save_words,

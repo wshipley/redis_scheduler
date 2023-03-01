@@ -7,11 +7,13 @@ import json
 class Downloader:
     def start(self, jobinstructions):
         print("hello world")
-        self.download_json()
+        url = jobinstructions.get('url')
+        self.download_json(url)
         print("done")
+
     #
-    def download_json(self):
-        items = requests.get('https://api.tvmaze.com/singlesearch/shows?q=narcos&embed=episodes')  # (your url)
+    def download_json(self, url):
+        items = requests.get(url)  # (your url)
         data = items.json()
         with open('data.json', 'w') as f:
             json.dump(data, f)
